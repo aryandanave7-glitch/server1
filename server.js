@@ -53,6 +53,41 @@ io.on("connection", (socket) => {
     }
   });
 
+  // server.js - New Code
+// -- Video/Voice Call Signaling --
+socket.on("call-request", ({ to, from, callType }) => {
+    const targetId = userSockets[normKey(to)];
+    if (targetId) {
+        io.to(targetId).emit("incoming-call", { from: normKey(from), callType });
+        console.log(`📞 Call request (${callType}): ${from.slice(0,12)}... → ${to.slice(0,12)}...`);
+    }
+});
+
+socket.on("call-accepted", ({ to, from }) => {
+    const targetId = userSockets[normKey(to)];
+    if (targetId) {
+        io.to(targetId).emit("call-accepted", { from: normKey(from) });
+        console.log(`✔️ Call accepted: ${from.slice(0,12)}... → ${to.slice(0,12)}...`);
+    }
+});
+
+socket.on("call-rejected", ({ to, from }) => {
+    const targetId = userSockets[normKey(to)];
+    if (targetId) {
+        io.to(targetId).emit("call-rejected", { from: normKey(from) });
+        console.log(`❌ Call rejected: ${from.slice(0,12)}... → ${to.slice(0,12)}...`);
+    }
+});
+
+socket.on("call-ended", ({ to, from }) => {
+    const targetId = userSockets[normKey(to)];
+    if (targetId) {
+        io.to(targetId).emit("call-ended", { from: normKey(from) });
+        console.log(`👋 Call ended: ${from.slice(0,12)}... & ${to.slice(0,12)}...`);
+    }
+});
+// ---------------------------------
+
 
   // Room and signaling logic remains the same
   socket.on("join", (room) => {
